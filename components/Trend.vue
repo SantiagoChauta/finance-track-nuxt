@@ -1,12 +1,13 @@
+import { useCurrency } from '../composables/useCurrency';
 <template>
  <div>
-    <div class="font-bold" :class="[color]">
+    <div class="font-bold" :class="[trendingUp ? 'green':'red']">
         {{ title }}
     </div>
     <div class="text-2xl font-extrabold text-black dark:text-white mb-2 " >
         <USkeleton class="h-8 w-full" v-if="loading"/>
         <div v-else>
-            {{ amount }}
+            {{ currency }}
         </div>
     </div>
 
@@ -38,6 +39,8 @@ const trendingUp = computed(
 const icon = computed(
     () => trendingUp.value ? 'i-heroicons-arrow-trending-up' : 'i-heroicons-arrow-trending-down' 
 )
+
+const {currency} = useCurrency(props.amount)
 
 const percentageTrend = computed(() => {
         if(props.amount ===0 || props.lastAmount===0) return 'insufficient data'

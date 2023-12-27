@@ -13,11 +13,48 @@
         <Trend  title="Saves" :amount="4000" :lastAmount="7238" :loading="false"/>
         
     </section>
+
+    <section>
+        <div v-for="(transactionOnDay,date) in transactionsGroupedByDate" :key="date" class="mb-10">
+            <DailyTransactionSummary :date="date" :transactions="transactionOnDay" />
+            <Transaction v-for="transaction in transactionOnDay" :key="transaction.id" :transaction="transaction"/>
+        </div>
+    </section>
 </template>
 
 <script setup>
 
 import { transactionViewOptions } from '~/constants';
+
 const selectedView = ref(transactionViewOptions[1])
+
+const supabase = useSupabaseClient();
+
+const transactions = ref([])
+
+const { data,pending} = await useAsyncData (
+    'transactions',
+    async () => {
+        const {data,error} = await supabase.from('transactions').select() 
+        return error ? [] : data
+    }
+)
+transactions.value = data.value
+
+const transactionsGroupedByDate = computed (() => {
+    let grouped = {}
+
+    for (const transaction of transactions.value){
+        const date = new Date(transaction.created_at).toISOString().split('T')[0];   
+        
+        if(!grouped[date]){
+            grouped[date] = []
+        }
+        grouped[date].push(transaction)
+    }
+
+    return grouped;
+})
+
 
 </script>
